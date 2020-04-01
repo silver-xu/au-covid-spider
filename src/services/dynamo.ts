@@ -22,8 +22,8 @@ export const getStatsByRegionCode = async (regionCode: string): Promise<Stats | 
   }
 };
 
-export const upsertStats = async (regionCode: string, stats: Stats) => {
-  var params = {
+export const upsertStats = async (regionCode: string, stats: Stats): Promise<void> => {
+  const params = {
     TableName: TABLE_NAME,
     Item: {
       regionCode: regionCode,
