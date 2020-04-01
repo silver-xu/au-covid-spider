@@ -1,7 +1,7 @@
 module.exports = {
   roots: ['src'],
   transform: { '\\.ts$': ['ts-jest'] },
-  collectCoverage: true,
+  collectCoverage: false,
   collectCoverageFrom: ['src/**/*.{ts,js}'],
   coverageThreshold: {
     global: {

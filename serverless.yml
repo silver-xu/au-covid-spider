@@ -7,15 +7,20 @@ provider:
   stage: ${opt:stage}
   timeout: 900
   environment:
-    DYNAMODB_TABLE: ${self:service}-${self:provider.stage}
+    STATS_TABLE: ${self:service}-${self:provider.stage}
+    SYS_TABLE: ${self:service}-sys-${self:provider.stage}
     SMARTABLE_API_KEY: ${env:SMARTABLE_API_KEY}
   iamRoleStatements:
     - Effect: Allow
       Action:
         - dynamodb:PutItem
         - dynamodb:GetItem
-      Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}'
-
+      Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.STATS_TABLE}'
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+      Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.SYS_TABLE}'
 functions:
   index:
     handler: dist/index.handler
@@ -36,4 +41,17 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        TableName: ${self:provider.environment.STATS_TABLE}
+    LastRefreshTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: key
+            AttributeType: S
+        KeySchema:
+          - AttributeName: key
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.SYS_TABLE}
