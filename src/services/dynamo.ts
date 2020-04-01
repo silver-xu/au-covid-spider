@@ -2,12 +2,14 @@ import AWS from 'aws-sdk';
 import { Stats } from '../types/stats';
 
 AWS.config.update({ region: 'ap-southeast-2' });
-const TABLE_NAME = 'au-covid-spider-prod';
+const STATS_TABLE_NAME = 'au-covid-spider-prod';
+const SYS_TABLE_NAME = 'au-covid-spider-sys-prod';
+
 const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
 
 export const getStatsByRegionCode = async (regionCode: string): Promise<Stats | undefined> => {
   const params = {
-    TableName: TABLE_NAME,
+    TableName: STATS_TABLE_NAME,
     Key: { regionCode: regionCode },
   };
 
@@ -24,10 +26,27 @@ export const getStatsByRegionCode = async (regionCode: string): Promise<Stats | 
 
 export const upsertStats = async (regionCode: string, stats: Stats): Promise<void> => {
   const params = {
-    TableName: TABLE_NAME,
+    TableName: STATS_TABLE_NAME,
     Item: {
       regionCode: regionCode,
       stats: JSON.stringify(stats),
+    },
+  };
+
+  try {
+    await docClient.put(params).promise();
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const upsertLastRefreshDate = async (): Promise<void> => {
+  const params = {
+    TableName: SYS_TABLE_NAME,
+    Item: {
+      key: 'LastRefreshDate',
+      value: new Date().toISOString(),
     },
   };
 

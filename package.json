@@ -10,7 +10,7 @@
     "format": "eslint src/**/*.ts --fix",
     "test": "jest",
     "codecov": "codecov",
-    "deploy": "sls deploy --stage prod --force"
+    "deploy": "yarn build && sls deploy --stage prod --force"
   },
   "author": "Silver Xu",
   "license": "AGPL-3.0-only",

@@ -3,7 +3,7 @@ import Bottleneck from 'bottleneck';
 import { config } from './config';
 import { default as regions } from './config/regions.json';
 import { fetchStats } from './httpClient/statsClient';
-import { upsertStats } from './services/dynamo';
+import { upsertStats, upsertLastRefreshDate } from './services/dynamo';
 
 const API_TIMEOUT_IN_SEC = 15;
 
@@ -19,12 +19,16 @@ export const handler = async () => {
     apiLimiter.schedule(async () => {
       console.log(`[Info]: Start indexing ${regions[regionCode]}`);
       const stats = await fetchStats(statsApiEndpoint, regionCode);
+      console.log(`[Info]: Updating last refresh date`);
       await upsertStats(regionCode, stats);
       console.log(`[Info]: Indexing ${regions[regionCode]} completed`);
+      upsertLastRefreshDate();
       return stats;
     }),
   );
 
-  return await Promise.all(refreshAllRegions);
+  await Promise.all(refreshAllRegions);
   console.log('[Info]: Spider completed...');
+
+  return Promise.resolve(true);
 };
