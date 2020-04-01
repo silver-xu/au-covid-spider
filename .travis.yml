@@ -1,6 +1,17 @@
 language: node_js
 node_js:
   - '12.14.1'
+
+jobs:
+  include:
+    - stage: test
+      script: yarn test
+    - stage: deploy
+      branches:
+        only:
+          - master
+      script: yarn deploy
+
 after_success:
   - yarn codecov
 

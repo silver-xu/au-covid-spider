@@ -1,0 +1,39 @@
+service: au-covid-spider
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: ap-southeast-2
+  stage: ${opt:stage}
+  timeout: 900
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${self:provider.stage}
+    SMARTABLE_API_KEY: ${env:SMARTABLE_API_KEY}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+      Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}'
+
+functions:
+  index:
+    handler: dist/index.handler
+    events:
+      - schedule: cron(0 1 * * ? *)
+
+resources:
+  Resources:
+    StatsTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: regionCode
+            AttributeType: S
+        KeySchema:
+          - AttributeName: regionCode
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
