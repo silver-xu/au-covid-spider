@@ -32,3 +32,7 @@ export const handler = async () => {
 
   return Promise.resolve(true);
 };
+
+if (!process.env.LAMBDA_ENV) {
+  handler();
+}

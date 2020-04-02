@@ -25,11 +25,28 @@ export const getStatsByRegionCode = async (regionCode: string): Promise<Stats | 
 };
 
 export const upsertStats = async (regionCode: string, stats: Stats): Promise<void> => {
+  const {
+    totalConfirmedCases,
+    newlyConfirmedCases,
+    totalDeaths,
+    newDeaths,
+    totalRecoveredCases,
+    newlyRecoveredCases,
+    history,
+  } = stats;
+
   const params = {
     TableName: STATS_TABLE_NAME,
     Item: {
       regionCode: regionCode,
-      stats: JSON.stringify(stats),
+      totalConfirmedCases,
+      newlyConfirmedCases,
+      totalDeaths,
+      newDeaths,
+      totalRecoveredCases,
+      newlyRecoveredCases,
+      histories: JSON.stringify(history),
+      updatedDate: new Date().toISOString(),
     },
   };
 
