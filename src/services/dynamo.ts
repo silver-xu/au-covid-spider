@@ -1,30 +1,18 @@
 import AWS from 'aws-sdk';
-import { Stats } from '../types/stats';
 
-AWS.config.update({ region: 'ap-southeast-2' });
+import { Stats } from '../types/stats';
+import { default as regions } from '../config/regions.json';
+
 const STATS_TABLE_NAME = 'au-covid-spider-prod';
 const SYS_TABLE_NAME = 'au-covid-spider-sys-prod';
 
+AWS.config.update({ region: 'ap-southeast-2' });
 const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
 
-export const getStatsByRegionCode = async (regionCode: string): Promise<Stats | undefined> => {
-  const params = {
-    TableName: STATS_TABLE_NAME,
-    Key: { regionCode: regionCode },
-  };
-
-  try {
-    const data = await docClient.get(params).promise();
-    if (data && data.Item) {
-      return JSON.parse(data.Item.stats) as Stats;
-    } else return undefined;
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-};
-
 export const upsertStats = async (regionCode: string, stats: Stats): Promise<void> => {
+  const shortRegionCode = regionCode.replace('AU-', '');
+  const region = regions[regionCode];
+
   const {
     totalConfirmedCases,
     newlyConfirmedCases,
@@ -38,7 +26,8 @@ export const upsertStats = async (regionCode: string, stats: Stats): Promise<voi
   const params = {
     TableName: STATS_TABLE_NAME,
     Item: {
-      regionCode: regionCode,
+      regionCode: shortRegionCode,
+      region,
       totalConfirmedCases,
       newlyConfirmedCases,
       totalDeaths,

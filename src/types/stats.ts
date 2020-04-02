@@ -1,10 +1,10 @@
 export interface Stats {
-  totalConfirmedCases;
-  newlyConfirmedCases;
-  totalDeaths;
-  newDeaths;
-  totalRecoveredCases;
-  newlyRecoveredCases;
+  totalConfirmedCases: number;
+  newlyConfirmedCases: number;
+  totalDeaths: number;
+  newDeaths: number;
+  totalRecoveredCases: number;
+  newlyRecoveredCases: number;
   history: StatsHistory[];
 }
 
