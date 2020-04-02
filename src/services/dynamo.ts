@@ -34,7 +34,7 @@ export const upsertStats = async (regionCode: string, stats: Stats): Promise<voi
       newDeaths,
       totalRecoveredCases,
       newlyRecoveredCases,
-      histories: JSON.stringify(history),
+      history: JSON.stringify(history),
       updatedDate: new Date().toISOString(),
     },
   };

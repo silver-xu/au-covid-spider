@@ -5,32 +5,34 @@ import { default as regions } from './config/regions.json';
 import { fetchStats } from './httpClient/statsClient';
 import { upsertStats, upsertLastRefreshDate } from './services/dynamo';
 
-const API_TIMEOUT_IN_SEC = 15;
+import Git from 'nodegit';
+import csv from 'csv-parser';
+import fs from 'fs';
+import rmfr from 'rmfr';
+import util from 'util';
 
-const { statsApiEndpoint } = config;
-const apiLimiter = new Bottleneck({
-  minTime: API_TIMEOUT_IN_SEC * 1000,
-});
+const readdir = util.promisify(fs.exists);
 
 export const handler = async () => {
-  console.log(`[Info]: Spider started with timeout of ${API_TIMEOUT_IN_SEC}...`);
+  if (await readdir('dataRepo')) {
+    console.log('[Info]: dataRepo directory already exists');
+    console.log('[Info]: Dropping dataRepo directory');
+    await rmfr('dataRepo');
+    console.log('[Info]: dataRepo directory dropped');
+  }
 
-  const refreshAllRegions = Object.keys(regions).map(regionCode =>
-    apiLimiter.schedule(async () => {
-      console.log(`[Info]: Start indexing ${regions[regionCode]}`);
-      const stats = await fetchStats(statsApiEndpoint, regionCode);
-      console.log(`[Info]: Updating last refresh date`);
-      await upsertStats(regionCode, stats);
-      console.log(`[Info]: Indexing ${regions[regionCode]} completed`);
-      upsertLastRefreshDate();
-      return stats;
-    }),
-  );
+  console.log('[Info]: cloning John Hopkins Datasets from github'
+  await Git.Clone('https://github.com/CSSEGISandData/COVID-19.git', 'dataRepo');
+  console.log('[Info]: John Hopkins Datasets cloned'
 
-  await Promise.all(refreshAllRegions);
-  console.log('[Info]: Spider completed...');
+  const results = [];
 
-  return Promise.resolve(true);
+  fs.createReadStream('./dataRepo/csse_covid_19_data/csse_covid_19_daily_reports/01-22-2020.csv')
+    .pipe(csv())
+    .on('data', data => results.push(data))
+    .on('end', () => {
+      console.log(results);
+    });
 };
 
 if (!process.env.LAMBDA_ENV) {

@@ -36,7 +36,10 @@
     "@types/node": "^13.9.8",
     "aws-sdk": "^2.650.0",
     "bottleneck": "^2.19.5",
+    "csv-parser": "^2.3.2",
     "lodash.omit": "^4.5.0",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "nodegit": "^0.26.5",
+    "rmfr": "^2.0.0"
   }
 }
