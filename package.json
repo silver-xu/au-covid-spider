@@ -39,7 +39,7 @@
     "csv-parser": "^2.3.2",
     "lodash.omit": "^4.5.0",
     "node-fetch": "^2.6.0",
-    "nodegit": "^0.26.5",
-    "rmfr": "^2.0.0"
+    "rmfr": "^2.0.0",
+    "unzipper": "^0.10.10"
   }
 }
