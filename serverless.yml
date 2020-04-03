@@ -25,7 +25,7 @@ functions:
   index:
     handler: dist/index.handler
     events:
-      - schedule: rate(0 1 * * ? *)
+      - schedule: cron(0 1 * * ? *)
 
 resources:
   Resources:
