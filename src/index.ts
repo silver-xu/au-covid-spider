@@ -1,55 +1,77 @@
-import Bottleneck from 'bottleneck';
+import util from 'util';
+import rmfr from 'rmfr';
+import fs from 'fs';
+import moment from 'moment';
+import neatCsv from 'neat-csv';
 
 import { config } from './config';
+import { asyncForEach } from './utils';
+import { extractCSV } from './csv/csvParser';
+import { Record } from './types/record';
+import { mapToStats } from './mapper/mapToStats';
+import { downloadData } from './httpClient/download';
+
 import { default as regions } from './config/regions.json';
-import { fetchStats } from './httpClient/statsClient';
+import { default as countries } from './config/countries.json';
 import { upsertStats, upsertLastRefreshDate } from './services/dynamo';
 
-import fetch from 'node-fetch';
-import csv from 'csv-parser';
-import fs from 'fs';
-import rmfr from 'rmfr';
-import util from 'util';
-import unzipper from 'unzipper';
-import fstream from 'fstream';
+const { dataRepoPath } = config;
+const dataDir = 'COVID-19-master/csse_covid_19_data/csse_covid_19_daily_reports';
 
 const exists = util.promisify(fs.exists);
-const dataRepoPath = '/tmp';
-const repoUrl = 'https://github.com/CSSEGISandData/COVID-19/archive/master.zip';
-
-const downloadData = async () => {
-  console.log('[Info]: Downloading John Hopkins Datasets from github');
-  const res = await fetch(repoUrl);
-  await new Promise((resolve, reject) => {
-    res.body.pipe(unzipper.Extract({ path: dataRepoPath }));
-
-    res.body.on('error', err => {
-      reject(err);
-    });
-    res.body.on('finish', function() {
-      console.log('[Info]: John Hopkins Datasets successfully downloaded and unzipped');
-      resolve();
-    });
-  });
-};
+const readdir = util.promisify(fs.readdir);
+const readFile = util.promisify(fs.readFile);
 
 export const handler = async () => {
-  if (await exists(`${dataRepoPath}/COVID-19-master`)) {
-    console.log('[Info]: Data folder not empty, delete!');
-    await rmfr(`${dataRepoPath}/COVID-19-master`);
-    console.log('[Info]: Previous data folder deleted');
-  }
+  // if (await exists(`${dataRepoPath}/COVID-19-master`)) {
+  //   console.log('[Info]: Data folder not empty, delete!');
+  //   await rmfr(`${dataRepoPath}/COVID-19-master`);
+  //   console.log('[Info]: Previous data folder deleted');
+  // }
 
-  await downloadData();
+  // await downloadData();
 
-  const results = [];
+  const results: { [regionCode: string]: Record[] } = {};
+  Object.values(regions).forEach(regionCode => {
+    results[regionCode] = [] as Record[];
+  });
+  Object.values(countries).forEach(regionCode => {
+    results[regionCode] = [] as Record[];
+  });
+  results['global'] = [] as Record[];
 
-  fs.createReadStream(`${dataRepoPath}/COVID-19-master/csse_covid_19_data/csse_covid_19_daily_reports/01-22-2020.csv`)
-    .pipe(csv())
-    .on('data', data => results.push(data))
-    .on('end', () => {
-      console.log(results);
-    });
+  const allFiles = await readdir(`${dataRepoPath}/${dataDir}/`);
+  const csvFiles = allFiles.filter(allFile => allFile.endsWith('.csv'));
+
+  const initialDate = moment.utc(csvFiles.sort()[0].replace('.csv', ''), 'MM-DD-YYYY').toISOString();
+
+  const tasks = csvFiles.map(async csvFile => {
+    const filePath = `${dataRepoPath}/${dataDir}/${csvFile}`;
+    const date = moment.utc(csvFile.replace('.csv', ''), 'MM-DD-YYYY').toISOString();
+
+    const content = await readFile(filePath);
+    const data = await neatCsv(content);
+
+    extractCSV(data, results, date, initialDate);
+  });
+
+  await asyncForEach(tasks, async task => {
+    await task;
+  });
+
+  const stats = mapToStats(results);
+  console.log('[Info]: CSV have been parsed and transformed');
+  console.log('[Info]: Refreshing data source');
+  const upsertTasks = Object.entries(stats).map(async ([regionCode, regionStats]) => {
+    await upsertStats(regionCode, regionStats);
+  });
+
+  await Promise.all(upsertTasks);
+  await upsertLastRefreshDate();
+  console.log('[Info]: Data source refresh completed');
+  console.log('[Info]: All Done!');
+
+  return true;
 };
 
 if (!process.env.LAMBDA_ENV) {

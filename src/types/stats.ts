@@ -10,7 +10,8 @@ export interface Stats {
 
 export interface StatsHistory {
   date: string;
-  confirmed: string;
-  deaths: string;
-  recovered: string;
+  confirmed: number;
+  deaths: number;
+  recovered: number;
+  lastUpdatedDate: string;
 }
