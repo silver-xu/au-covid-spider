@@ -17,20 +17,18 @@ const getSum = (parsedData: Record[], date: string, initialDate: string, region?
   const sum = parsedData
     .filter(parsedRow => !region || parsedRow.country === region)
     .reduce(
-      (current, accum) => {
-        return {
-          state: undefined,
-          country: undefined,
-          confirmed: accum.confirmed + current.confirmed,
-          deaths: accum.deaths + current.deaths,
-          recovered: accum.recovered + current.recovered,
-          lastUpdatedDate:
-            moment.utc(current.lastUpdatedDate).unix() > moment.utc(accum.lastUpdatedDate).unix()
-              ? current.lastUpdatedDate
-              : accum.lastUpdatedDate,
-          reportingDate: date,
-        };
-      },
+      (current, accum) => ({
+        state: undefined,
+        country: undefined,
+        confirmed: accum.confirmed + current.confirmed,
+        deaths: accum.deaths + current.deaths,
+        recovered: accum.recovered + current.recovered,
+        lastUpdatedDate:
+          moment.utc(current.lastUpdatedDate).unix() > moment.utc(accum.lastUpdatedDate).unix()
+            ? current.lastUpdatedDate
+            : accum.lastUpdatedDate,
+        reportingDate: date,
+      }),
       {
         confirmed: 0,
         deaths: 0,

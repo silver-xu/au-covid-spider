@@ -28,6 +28,12 @@ const getLastCase = (records: Record[], key: string): number => {
   return lastNumber;
 };
 
+const getMaxLastUpdatedDate = (records: Record[]): string => {
+  return records.reduce((accum, current) =>
+    moment.utc(accum.lastUpdatedDate).unix() < moment.utc(current.lastUpdatedDate).unix() ? current : accum,
+  ).lastUpdatedDate;
+};
+
 const mapHistory = (record: Record): StatsHistory => ({
   date: record.reportingDate,
   confirmed: record.confirmed,
@@ -59,6 +65,7 @@ export const mapToStats = (records: { [locationCode: string]: Record[] }): { [lo
       newDeaths,
       totalRecoveredCases,
       newlyRecoveredCases,
+      lastUpdatedDate: getMaxLastUpdatedDate(sortedLocationRecords),
       history: sortedLocationRecords.map(record => mapHistory(record)),
     };
   });

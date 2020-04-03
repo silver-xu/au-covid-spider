@@ -5,6 +5,7 @@ export interface Stats {
   newDeaths: number;
   totalRecoveredCases: number;
   newlyRecoveredCases: number;
+  lastUpdatedDate: string;
   history: StatsHistory[];
 }
 
