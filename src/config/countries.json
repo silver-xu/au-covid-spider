@@ -75,7 +75,6 @@
       "Fujian": { "code": "Fujian" },
       "Gansu": { "code": "Gansu" },
       "Gibraltar": { "code": "Gibraltar" },
-      "Grand Princess": { "code": "GrandPrincess" },
       "Greenland": { "code": "Greenland" },
       "Guadeloupe": { "code": "Guadeloupe" },
       "Guam": { "code": "Guam" },
@@ -144,7 +143,6 @@
     "states": {
       "Alberta": { "code": "Alberta" },
       "British Columbia": { "code": "BritishColumbia" },
-      "Grand Princess": { "code": "GrandPrincess" },
       "Manitoba": { "code": "Manitoba" },
       "New Brunswick": { "code": "NewBrunswick" },
       "Newfoundland and Labrador": { "code": "NewfoundlandandLabrador" },
