@@ -1,6 +1,7 @@
 import AWS from 'aws-sdk';
 
 import { Stats } from '../types/stats';
+import { rejects } from 'assert';
 
 const STATS_TABLE_NAME = 'au-covid-spider-prod';
 const SYS_TABLE_NAME = 'au-covid-spider-sys-prod';
@@ -9,8 +10,6 @@ AWS.config.update({ region: 'ap-southeast-2' });
 const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
 
 export const upsertStats = async (regionCode: string, stats: Stats): Promise<void> => {
-  const shortRegionCode = regionCode.replace('AU-', '');
-
   const {
     totalConfirmedCases,
     newlyConfirmedCases,
@@ -24,7 +23,7 @@ export const upsertStats = async (regionCode: string, stats: Stats): Promise<voi
   const params = {
     TableName: STATS_TABLE_NAME,
     Item: {
-      regionCode: shortRegionCode,
+      regionCode,
       totalConfirmedCases,
       newlyConfirmedCases,
       totalDeaths,
@@ -36,11 +35,28 @@ export const upsertStats = async (regionCode: string, stats: Stats): Promise<voi
     },
   };
 
-  try {
-    await docClient.put(params).promise();
-  } catch (error) {
-    console.log(error);
-    throw error;
+  let success = false;
+  let timeout = 0;
+  while (!success) {
+    try {
+      await new Promise((resolve, reject) =>
+        setTimeout(async () => {
+          try {
+            await docClient.put(params).promise();
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        }, timeout * 1000),
+      );
+      success = true;
+      console.log(`[Info]: Upserte ${regionCode} successfully.`);
+    } catch (error) {
+      console.log(error);
+      const timeout = Math.random() * 300;
+
+      console.log(`[Info]: Because of the exception, retry will happen ${timeout} secs later.`);
+    }
   }
 };
 

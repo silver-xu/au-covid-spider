@@ -39,8 +39,8 @@ resources:
           - AttributeName: regionCode
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
         TableName: ${self:provider.environment.STATS_TABLE}
     LastRefreshTable:
       Type: 'AWS::DynamoDB::Table'
