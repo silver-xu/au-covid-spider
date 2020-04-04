@@ -14,8 +14,7 @@ import { downloadData } from './httpClient/download';
 import { default as countries } from './config/countries.json';
 import { upsertStats, upsertLastRefreshDate } from './services/dynamo';
 
-const { dataRepoPath } = config;
-const dataDir = 'COVID-19-master/csse_covid_19_data/csse_covid_19_daily_reports';
+const { dataRepoPath, dataDir } = config;
 
 const exists = util.promisify(fs.exists);
 const readdir = util.promisify(fs.readdir);

@@ -12,9 +12,15 @@ const toIsoDate = (dateString: string): string =>
   moment.utc(dateString, 'M/D/YY', true).toISOString() ||
   moment.utc(dateString, moment.ISO_8601, true).toISOString();
 
-const getSum = (parsedData: Record[], date: string, initialDate: string, region?: string): Record | undefined => {
+const getSum = (
+  parsedData: Record[],
+  date: string,
+  initialDate: string,
+  country?: string,
+  state?: string,
+): Record | undefined => {
   const sum = parsedData
-    .filter((parsedRow) => !region || parsedRow.country === region)
+    .filter((parsedRow) => (!country || parsedRow.country === country) && (!state || parsedRow.state === state))
     .reduce(
       (current, accum) => ({
         state: undefined,
@@ -78,9 +84,10 @@ export const extractCSV = (
 
     if (country['states']) {
       Object.entries(country['states']).forEach(([stateName, state]) => {
-        const value = parsedData.find((parsedRow) => parsedRow.state === stateName);
-        if (value) {
-          results[state['code']].push(value);
+        const sum = getSum(parsedData, date, initialDate, undefined, stateName);
+
+        if (sum) {
+          results[state['code']].push(sum);
         }
       });
     }
