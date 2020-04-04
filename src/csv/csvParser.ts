@@ -3,7 +3,6 @@ import neatCsv from 'neat-csv';
 
 import { Record } from '../types/record';
 
-import { default as regions } from '../config/regions.json';
 import { default as countries } from '../config/countries.json';
 
 const toIsoDate = (dateString: string): string =>
@@ -15,7 +14,7 @@ const toIsoDate = (dateString: string): string =>
 
 const getSum = (parsedData: Record[], date: string, initialDate: string, region?: string): Record | undefined => {
   const sum = parsedData
-    .filter(parsedRow => !region || parsedRow.country === region)
+    .filter((parsedRow) => !region || parsedRow.country === region)
     .reduce(
       (current, accum) => ({
         state: undefined,
@@ -52,9 +51,15 @@ export const extractCSV = (
 ): void => {
   const parsedData = data.map(
     (row): Record => {
+      let country = row['Country/Region'] || row['Country_Region'];
+
+      // Correcting the political mistake John Hopkins made.
+      // Taiwan is part of China!
+      country = country === 'Taiwan' ? 'China' : country;
+
       return {
         state: row['﻿Province/State'] || row['Province/State'] || row['Province_State'],
-        country: row['Country/Region'] || row['Country_Region'],
+        country,
         lastUpdatedDate: toIsoDate(row['Last Update']) || toIsoDate(row['Last_Update']),
         reportingDate: date,
         confirmed: row['Confirmed'] ? parseInt(row['Confirmed'], 10) : 0,
@@ -64,24 +69,25 @@ export const extractCSV = (
     },
   );
 
-  Object.entries(regions).forEach(([region, regionCode]) => {
-    const value = parsedData.find(parsedRow => parsedRow.state === region);
-    if (value) {
-      results[regionCode].push(value);
-    }
-  });
-
-  Object.entries(countries).forEach(([country, countryCode]) => {
-    const sum = getSum(parsedData, date, initialDate, country);
+  Object.entries(countries).forEach(([countryName, country]) => {
+    const sum = getSum(parsedData, date, initialDate, countryName);
 
     if (sum) {
-      results[countryCode].push(sum);
+      results[country.code].push(sum);
+    }
+
+    if (country['states']) {
+      Object.entries(country['states']).forEach(([stateName, state]) => {
+        const value = parsedData.find((parsedRow) => parsedRow.state === stateName);
+        if (value) {
+          results[state['code']].push(value);
+        }
+      });
     }
   });
 
-  const sum = getSum(parsedData, date, initialDate);
-
-  if (sum) {
-    results['global'].push(sum);
+  const globalSum = getSum(parsedData, date, initialDate);
+  if (globalSum) {
+    results['Global'].push(globalSum);
   }
 };

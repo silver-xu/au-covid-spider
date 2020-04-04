@@ -1,7 +1,6 @@
 import AWS from 'aws-sdk';
 
 import { Stats } from '../types/stats';
-import { default as regions } from '../config/regions.json';
 
 const STATS_TABLE_NAME = 'au-covid-spider-prod';
 const SYS_TABLE_NAME = 'au-covid-spider-sys-prod';
@@ -11,7 +10,6 @@ const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
 
 export const upsertStats = async (regionCode: string, stats: Stats): Promise<void> => {
   const shortRegionCode = regionCode.replace('AU-', '');
-  const region = regions[regionCode];
 
   const {
     totalConfirmedCases,
@@ -27,7 +25,6 @@ export const upsertStats = async (regionCode: string, stats: Stats): Promise<voi
     TableName: STATS_TABLE_NAME,
     Item: {
       regionCode: shortRegionCode,
-      region,
       totalConfirmedCases,
       newlyConfirmedCases,
       totalDeaths,

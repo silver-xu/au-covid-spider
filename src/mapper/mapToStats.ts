@@ -34,39 +34,55 @@ const getMaxLastUpdatedDate = (records: Record[]): string => {
   ).lastUpdatedDate;
 };
 
-const mapHistory = (record: Record): StatsHistory => ({
-  date: record.reportingDate,
-  confirmed: record.confirmed,
-  deaths: record.deaths,
-  recovered: record.recovered,
-  lastUpdatedDate: record.lastUpdatedDate,
-});
+const mapHistory = (record: Record, pastRecord?: Record): StatsHistory => {
+  const pastConfirmed = pastRecord?.confirmed || 0;
+  const pastDeaths = pastRecord?.deaths || 0;
+  const pastRecovered = pastRecord?.recovered || 0;
 
-export const mapToStats = (records: { [locationCode: string]: Record[] }): { [locationCode: string]: Stats } => {
+  return {
+    date: record.reportingDate,
+    totalConfirmedCases: record.confirmed,
+    newlyConfirmedCases: record.confirmed - pastConfirmed,
+    netTotalConfirmedCases: record.confirmed - record.recovered - record.deaths,
+    netNewlyConfirmedCases:
+      record.confirmed - pastConfirmed - (record.recovered - pastRecovered) - (record.deaths - pastDeaths),
+    totalDeaths: record.deaths,
+    newDeaths: record.deaths - pastDeaths,
+    totalRecoveredCases: record.recovered,
+    newlyRecoveredCases: record.recovered - pastRecovered,
+    lastUpdatedDate: record.lastUpdatedDate,
+  };
+};
+
+export const mapToStats = (records: { [regionCode: string]: Record[] }): { [regionCode: string]: Stats } => {
   const stats = {} as { [regionCode: string]: Stats };
 
-  Object.keys(records).forEach(locationCode => {
-    const sortedLocationRecords = records[locationCode].sort(
+  Object.keys(records).forEach((regionCode) => {
+    const sortedRegionRecords = records[regionCode].sort(
       (recordA, recordB) => moment.utc(recordA.reportingDate).unix() - moment.utc(recordB.reportingDate).unix(),
     );
 
-    const newlyConfirmedCases = getNewCase(sortedLocationRecords, 'confirmed');
-    const newDeaths = getNewCase(sortedLocationRecords, 'deaths');
-    const newlyRecoveredCases = getNewCase(sortedLocationRecords, 'recovered');
+    const newlyConfirmedCases = getNewCase(sortedRegionRecords, 'confirmed');
+    const newDeaths = getNewCase(sortedRegionRecords, 'deaths');
+    const newlyRecoveredCases = getNewCase(sortedRegionRecords, 'recovered');
 
-    const totalConfirmedCases = getLastCase(sortedLocationRecords, 'confirmed');
-    const totalDeaths = getLastCase(sortedLocationRecords, 'deaths');
-    const totalRecoveredCases = getLastCase(sortedLocationRecords, 'recovered');
+    const totalConfirmedCases = getLastCase(sortedRegionRecords, 'confirmed');
+    const totalDeaths = getLastCase(sortedRegionRecords, 'deaths');
+    const totalRecoveredCases = getLastCase(sortedRegionRecords, 'recovered');
 
-    stats[locationCode] = {
+    stats[regionCode] = {
       totalConfirmedCases,
       newlyConfirmedCases,
+      netTotalConfirmedCases: totalConfirmedCases - totalRecoveredCases - totalDeaths,
+      netNewlyConfirmedCases: newlyConfirmedCases - newlyRecoveredCases - newDeaths,
       totalDeaths,
       newDeaths,
       totalRecoveredCases,
       newlyRecoveredCases,
-      lastUpdatedDate: getMaxLastUpdatedDate(sortedLocationRecords),
-      history: sortedLocationRecords.map(record => mapHistory(record)),
+      lastUpdatedDate: getMaxLastUpdatedDate(sortedRegionRecords),
+      history: sortedRegionRecords.map((record, index) =>
+        mapHistory(record, index > 0 ? sortedRegionRecords[index - 1] : undefined),
+      ),
     };
   });
 

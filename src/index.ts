@@ -11,7 +11,6 @@ import { Record } from './types/record';
 import { mapToStats } from './mapper/mapToStats';
 import { downloadData } from './httpClient/download';
 
-import { default as regions } from './config/regions.json';
 import { default as countries } from './config/countries.json';
 import { upsertStats, upsertLastRefreshDate } from './services/dynamo';
 
@@ -31,21 +30,25 @@ export const handler = async () => {
 
   await downloadData();
 
-  const results: { [regionCode: string]: Record[] } = {};
-  Object.values(regions).forEach(regionCode => {
-    results[regionCode] = [] as Record[];
+  const results: { [countryCode: string]: Record[] } = {};
+
+  Object.values(countries).forEach((country) => {
+    results[country.code] = [] as Record[];
+
+    if (country['states']) {
+      Object.values(country['states']).forEach((state) => {
+        const stateCode = state['code'];
+        results[stateCode] = [] as Record[];
+      });
+    }
   });
-  Object.values(countries).forEach(regionCode => {
-    results[regionCode] = [] as Record[];
-  });
-  results['global'] = [] as Record[];
 
   const allFiles = await readdir(`${dataRepoPath}/${dataDir}/`);
-  const csvFiles = allFiles.filter(allFile => allFile.endsWith('.csv'));
+  const csvFiles = allFiles.filter((allFile) => allFile.endsWith('.csv'));
 
   const initialDate = moment.utc(csvFiles.sort()[0].replace('.csv', ''), 'MM-DD-YYYY').toISOString();
 
-  const tasks = csvFiles.map(async csvFile => {
+  const tasks = csvFiles.map(async (csvFile) => {
     const filePath = `${dataRepoPath}/${dataDir}/${csvFile}`;
     const date = moment.utc(csvFile.replace('.csv', ''), 'MM-DD-YYYY').toISOString();
 
@@ -55,7 +58,7 @@ export const handler = async () => {
     extractCSV(data, results, date, initialDate);
   });
 
-  await asyncForEach(tasks, async task => {
+  await asyncForEach(tasks, async (task) => {
     await task;
   });
 
