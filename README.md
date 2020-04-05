@@ -1,5 +1,3 @@
-# Australia COVID-19 Data Spider [![Build Status](https://travis-ci.org/silver-xu/au-covid-spider.svg?branch=master)](https://travis-ci.org/silver-xu/au-covid-spider) [![codecov](https://codecov.io/gh/silver-xu/au-covid-spider/branch/master/graph/badge.svg)](https://codecov.io/gh/silver-xu/au-covid-spider) [![greenkeeper](https://badges.greenkeeper.io/silver-xu/au-covid-spider.svg?style=flat)](https://badges.greenkeeper.io/silver-xu/au-covid-spider.svg?style=flat)
+# COVID-19 Stats Spider [![Build Status](https://travis-ci.org/silver-xu/covid-stats-spider.svg?branch=master)](https://travis-ci.org/silver-xu/covid-stats-spider) [![codecov](https://codecov.io/gh/silver-xu/covid-stats-spider/branch/master/graph/badge.svg)](https://codecov.io/gh/silver-xu/covid-stats-spider) [![greenkeeper](https://badges.greenkeeper.io/silver-xu/covid-stats-spider.svg?style=flat)](https://badges.greenkeeper.io/silver-xu/covid-stats-spider.svg?style=flat)
 
-This Spider collects COVID 19 data from the Smartable.AI Api for Australia.
-
-It runs twice a day
+This Spider collects COVID 19 data from John Hopkins Medical School on Daily basis around 12:00PM Australian Eastern Time.
