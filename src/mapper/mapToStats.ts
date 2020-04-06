@@ -43,7 +43,7 @@ const mapHistory = (record: Record, pastRecord?: Record): StatsHistory => {
     date: record.reportingDate,
     totalConfirmedCases: record.confirmed,
     newlyConfirmedCases: record.confirmed - pastConfirmed,
-    netTotalConfirmedCases: record.confirmed - record.recovered - record.deaths,
+    currentConfirmedCases: record.confirmed - record.recovered - record.deaths,
     netNewlyConfirmedCases:
       record.confirmed - pastConfirmed - (record.recovered - pastRecovered) - (record.deaths - pastDeaths),
     totalDeaths: record.deaths,
@@ -73,7 +73,7 @@ export const mapToStats = (records: { [regionCode: string]: Record[] }): { [regi
     stats[regionCode] = {
       totalConfirmedCases,
       newlyConfirmedCases,
-      netTotalConfirmedCases: totalConfirmedCases - totalRecoveredCases - totalDeaths,
+      currentConfirmedCases: totalConfirmedCases - totalRecoveredCases - totalDeaths,
       netNewlyConfirmedCases: newlyConfirmedCases - newlyRecoveredCases - newDeaths,
       totalDeaths,
       newDeaths,
