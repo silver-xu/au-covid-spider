@@ -1,6 +1,6 @@
 export interface BaseStats {
   totalConfirmedCases: number;
-  netTotalConfirmedCases: number;
+  currentConfirmedCases: number;
   newlyConfirmedCases: number;
   netNewlyConfirmedCases: number;
   totalDeaths: number;
