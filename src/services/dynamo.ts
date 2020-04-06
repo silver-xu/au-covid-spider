@@ -1,7 +1,6 @@
 import AWS from 'aws-sdk';
 
 import { Stats } from '../types/stats';
-import { rejects } from 'assert';
 
 const STATS_TABLE_NAME = 'au-covid-spider-prod';
 const SYS_TABLE_NAME = 'au-covid-spider-sys-prod';
@@ -53,7 +52,7 @@ export const upsertStats = async (regionCode: string, stats: Stats): Promise<voi
       console.log(`[Info]: Upserte ${regionCode} successfully.`);
     } catch (error) {
       console.log(error);
-      const timeout = Math.random() * 300;
+      timeout = Math.random() * 300;
 
       console.log(`[Info]: Because of the exception, retry will happen ${timeout} secs later.`);
     }
