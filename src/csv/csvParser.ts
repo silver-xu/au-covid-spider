@@ -49,9 +49,13 @@ const getSum = (
   }
 };
 
-const mapCountry = (country: string) => {
-  return country.replace('Taiwan', 'China').replace('Mainland China', 'China').replace('UK', 'United Kingdom');
-};
+const mapCountry = (country: string): string =>
+  country
+    .replace('Taiwan', 'China')
+    .replace('Mainland China', 'China')
+    .replace('UK', 'United Kingdom')
+    .replace('Republic of Korea', 'Korea, South')
+    .replace('South Korea', 'Korea, South');
 
 export const extractCSV = (
   data: neatCsv.Row[],

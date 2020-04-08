@@ -21,13 +21,13 @@ const readdir = util.promisify(fs.readdir);
 const readFile = util.promisify(fs.readFile);
 
 export const handler = async () => {
-  // if (await exists(`${dataRepoPath}/COVID-19-master`)) {
-  //   console.log('[Info]: Data folder not empty, delete!');
-  //   await rmfr(`${dataRepoPath}/COVID-19-master`);
-  //   console.log('[Info]: Previous data folder deleted');
-  // }
+  if (await exists(`${dataRepoPath}/COVID-19-master`)) {
+    console.log('[Info]: Data folder not empty, delete!');
+    await rmfr(`${dataRepoPath}/COVID-19-master`);
+    console.log('[Info]: Previous data folder deleted');
+  }
 
-  // await downloadData();
+  await downloadData();
 
   const results: { [countryCode: string]: Record[] } = {};
 
@@ -68,8 +68,8 @@ export const handler = async () => {
     await upsertStats(regionCode, regionStats);
   });
 
-  // await Promise.all(upsertTasks);
-  // await upsertLastRefreshDate();
+  await Promise.all(upsertTasks);
+  await upsertLastRefreshDate();
   console.log('[Info]: Data source refresh completed');
   console.log('[Info]: All Done!');
 
