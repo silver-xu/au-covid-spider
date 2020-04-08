@@ -55,7 +55,8 @@ const mapCountry = (country: string): string =>
     .replace('Mainland China', 'China')
     .replace('UK', 'United Kingdom')
     .replace('Republic of Korea', 'Korea, South')
-    .replace('South Korea', 'Korea, South');
+    .replace('South Korea', 'Korea, South')
+    .replace('Iran (Islamic Republic of)', 'Iran');
 
 export const extractCSV = (
   data: neatCsv.Row[],
