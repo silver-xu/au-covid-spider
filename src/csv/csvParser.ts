@@ -22,7 +22,7 @@ const getSum = (
   const sum = parsedData
     .filter((parsedRow) => (!country || parsedRow.country === country) && (!state || parsedRow.state === state))
     .reduce(
-      (current, accum) => ({
+      (accum, current) => ({
         state: undefined,
         country: undefined,
         confirmed: accum.confirmed + current.confirmed,
@@ -49,6 +49,14 @@ const getSum = (
   }
 };
 
+const mapCountry = (country: string): string =>
+  country
+    .replace('Taiwan', 'China')
+    .replace('Mainland China', 'China')
+    .replace('UK', 'United Kingdom')
+    .replace('Republic of Korea', 'Korea, South')
+    .replace('South Korea', 'Korea, South');
+
 export const extractCSV = (
   data: neatCsv.Row[],
   results: { [regionCode: string]: Record[] },
@@ -57,11 +65,7 @@ export const extractCSV = (
 ): void => {
   const parsedData = data.map(
     (row): Record => {
-      let country = row['Country/Region'] || row['Country_Region'];
-
-      // Correcting the political mistake John Hopkins made.
-      // Taiwan is part of China!
-      country = country === 'Taiwan' ? 'China' : country;
+      const country = mapCountry(row['Country/Region'] || row['Country_Region']);
 
       return {
         state: row['﻿Province/State'] || row['Province/State'] || row['Province_State'],

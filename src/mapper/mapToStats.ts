@@ -29,9 +29,11 @@ const getLastCase = (records: Record[], key: string): number => {
 };
 
 const getMaxLastUpdatedDate = (records: Record[]): string => {
-  return records.reduce((accum, current) =>
-    moment.utc(accum.lastUpdatedDate).unix() < moment.utc(current.lastUpdatedDate).unix() ? current : accum,
-  ).lastUpdatedDate;
+  return (
+    records.sort(
+      (recordA, recordB) => moment.utc(recordA.lastUpdatedDate).unix() - moment.utc(recordB.lastUpdatedDate).unix(),
+    )[records.length - 1]?.lastUpdatedDate || '2000-01-01'
+  );
 };
 
 const mapHistory = (record: Record, pastRecord?: Record): StatsHistory => {
@@ -70,6 +72,11 @@ export const mapToStats = (records: { [regionCode: string]: Record[] }): { [regi
     const totalDeaths = getLastCase(sortedRegionRecords, 'deaths');
     const totalRecoveredCases = getLastCase(sortedRegionRecords, 'recovered');
 
+    const history = [];
+    for (let index = 0; index < sortedRegionRecords.length; index++) {
+      history.push(mapHistory(sortedRegionRecords[index], index > 0 ? sortedRegionRecords[index - 1] : undefined));
+    }
+
     stats[regionCode] = {
       totalConfirmedCases,
       newlyConfirmedCases,
@@ -80,9 +87,7 @@ export const mapToStats = (records: { [regionCode: string]: Record[] }): { [regi
       totalRecoveredCases,
       newlyRecoveredCases,
       lastUpdatedDate: getMaxLastUpdatedDate(sortedRegionRecords),
-      history: sortedRegionRecords.map((record, index) =>
-        mapHistory(record, index > 0 ? sortedRegionRecords[index - 1] : undefined),
-      ),
+      history,
     };
   });
 

@@ -53,7 +53,7 @@ export const upsertStats = async (regionCode: string, stats: Stats): Promise<voi
         }, timeout * 1000),
       );
       success = true;
-      console.log(`[Info]: Upserte ${regionCode} successfully.`);
+      console.log(`[Info]: Upsert ${regionCode} successfully.`);
     } catch (error) {
       console.log(error);
       timeout = Math.random() * 300;
