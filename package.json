@@ -18,7 +18,7 @@
     "@types/jest": "^24.0.25",
     "@typescript-eslint/eslint-plugin": "^2.15.0",
     "@typescript-eslint/parser": "^2.15.0",
-    "codecov": "^3.6.5",
+    "codecov": "^3.7.1",
     "dociql": "^1.0.3",
     "eslint": "^6.8.0",
     "husky": "^4.0.6",
