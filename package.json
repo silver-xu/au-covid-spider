@@ -35,7 +35,7 @@
   "dependencies": {
     "@types/aws-sdk": "^2.7.0",
     "@types/node": "^13.9.8",
-    "aws-sdk": "^2.650.0",
+    "aws-sdk": "^2.814.0",
     "lodash.omit": "^4.5.0",
     "moment": "^2.24.0",
     "neat-csv": "^5.2.0",
