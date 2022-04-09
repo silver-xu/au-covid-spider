@@ -37,7 +37,7 @@
     "@types/node": "^13.9.8",
     "aws-sdk": "^2.650.0",
     "lodash.omit": "^4.5.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "neat-csv": "^5.2.0",
     "node-fetch": "^2.6.0",
     "rmfr": "^2.0.0",
